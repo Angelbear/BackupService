@@ -22,7 +22,7 @@ import java.io.FileOutputStream;
 public class BackupService extends Service {
 
     @Override
-    public IBinder onBind(Intent arg0) {
+    public IBinder onBind(Intent intent) {
 
         return null;
     }
