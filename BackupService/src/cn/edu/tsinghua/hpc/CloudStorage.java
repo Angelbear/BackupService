@@ -55,7 +55,6 @@ public class CloudStorage {
 				return true;
 			}
 		} catch (IOException e) {
-			Log.d(TAG,e.getLocalizedMessage());
 		}
 		return false;
 	}

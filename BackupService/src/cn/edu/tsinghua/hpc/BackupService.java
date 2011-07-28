@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.TimeZone;
 
 import org.bouncycastle.util.encoders.Base64;
 import org.json.JSONException;
@@ -71,6 +72,11 @@ public class BackupService extends Service {
 					getContentResolver(), Settings.System.RINGTONE));
 			json.put(Settings.System.AUTO_TIME, Settings.System.getInt(
 					getContentResolver(), Settings.System.AUTO_TIME));
+			json.put(Settings.System.NOTIFICATION_SOUND, Settings.System
+					.getString(getContentResolver(),
+							Settings.System.NOTIFICATION_SOUND));
+			json.put("TimeZone", TimeZone.getDefault().getDisplayName());
+
 			Log.d(TAG, "Settings are " + json.toString());
 			CloudStorage.getInstance().putFile("settings", uid, token,
 					new ByteArrayInputStream(json.toString().getBytes()),
@@ -108,7 +114,6 @@ public class BackupService extends Service {
 
 	private void restoreSettings() {
 		Log.d(TAG, "begin restore");
-		preferences_restored = true;
 		try {
 			String content = convertStreamToString(CloudStorage.getInstance()
 					.downloadFile("settings", uid, token));
@@ -121,11 +126,17 @@ public class BackupService extends Service {
 			Settings.System.putInt(getContentResolver(),
 					Settings.System.AUTO_TIME,
 					json.getInt(Settings.System.AUTO_TIME));
+			Settings.System.putString(getContentResolver(),
+					Settings.System.NOTIFICATION_SOUND,
+					json.getString(Settings.System.NOTIFICATION_SOUND));
+			AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+			alarm.setTimeZone(json.getString("TimeZone"));
 			BackupService.this.setWallpaper(CloudStorage.getInstance()
 					.downloadFile("wallpaper", uid, token));
 			preferences_restored = true;
 			Log.d(TAG, "finish restore");
 		} catch (JSONException e) {
+			preferences_restored = true;
 			Log.d(TAG, e.getLocalizedMessage());
 		} catch (IOException e) {
 			Log.d(TAG, e.getLocalizedMessage());
@@ -141,39 +152,55 @@ public class BackupService extends Service {
 	@Override
 	public void onStart(Intent intent, int startId) {
 		if (firstStart) {
-			while (true) {
-				if (listener.isConnected()) {
-					try {
-						CCITSC mCCIT = new CCITSC(BackupService.this,
-								CAUtils.ip, CAUtils.port);
-						mCCIT.loginInit(false);
-						LoginView lv = mCCIT.requestLogin(false);
-						uid = lv.getUID();
-						token = new String(Base64.encode(lv.getSignature()));
-						Log.d(TAG, "uid is " + uid + " token is " + token);
-					} catch (Exception e) {
-						Log.d(TAG, e.getLocalizedMessage());
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					while (true) {
+						if (listener.isConnected()) {
+							try {
+								CCITSC mCCIT = new CCITSC(BackupService.this,
+										CAUtils.ip, CAUtils.port);
+								mCCIT.loginInit(false);
+								LoginView lv = mCCIT.requestLogin(false);
+								uid = lv.getUID();
+								token = new String(Base64.encode(lv
+										.getSignature()));
+								Log.d(TAG, "uid is " + uid + " token is "
+										+ token);
+							} catch (Exception e) {
+								Log.d(TAG, e.getLocalizedMessage());
+							}
+
+							break;
+						}
 					}
+					Intent alarmIntent = new Intent(BackupService.this,
+							RepeatingAlarmReceiver.class);
+					PendingIntent pendingIntent = PendingIntent.getBroadcast(
+							BackupService.this, 0, alarmIntent, 0);
 
-					break;
+					Log.d(TAG, "startup alarm");
+					AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+					alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
+							System.currentTimeMillis() + (5 * 1000), 60 * 1000,
+							pendingIntent);
+					firstStart = false;
 				}
-			}
-			Intent alarmIntent = new Intent(this, RepeatingAlarmReceiver.class);
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0,
-					alarmIntent, 0);
-
-			Log.d(TAG, "startup alarm");
-			AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-			alarmManager.setRepeating(AlarmManager.RTC_WAKEUP,
-					System.currentTimeMillis() + (5 * 1000), 60 * 1000,
-					pendingIntent);
-			firstStart = false;
+			}).start();
 		} else {
-			if (!preferences_restored) {
-				restoreSettings();
-			} else {
-				backupSettings();
-			}
+			new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					if (!preferences_restored) {
+						restoreSettings();
+					} else {
+						backupSettings();
+					}
+				}
+			}).start();
+
 		}
 	}
 

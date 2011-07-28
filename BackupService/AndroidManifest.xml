@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="cn.edu.tsinghua.hpc"
-      android:versionCode="1"
-      android:versionName="1.0">
-<uses-permission android:name="android.permission.SET_TIME_ZONE"></uses-permission>
-<uses-permission android:name="android.permission.SET_WALLPAPER"></uses-permission>
-<uses-permission android:name="android.permission.CHANGE_CONFIGURATION"></uses-permission>
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	package="cn.edu.tsinghua.hpc" android:versionCode="1"
+	android:versionName="1.0">
+	<uses-permission android:name="android.permission.SET_TIME_ZONE"></uses-permission>
+	<uses-permission android:name="android.permission.SET_WALLPAPER"></uses-permission>
+	<uses-permission android:name="android.permission.CHANGE_CONFIGURATION"></uses-permission>
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />
-		<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	<uses-permission android:name="android.permission.WRITE_SETTINGS" />
@@ -19,15 +18,17 @@
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 	<uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 	<uses-permission android:name="android.permission.SEND_SMS"></uses-permission>
+	<uses-permission android:name="android.permission.SET_TIME_ZONE"></uses-permission>
 
 
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <service android:name=".BackupService"></service>
-        <receiver android:name=".BootCompleteReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
-            </intent-filter>
-        </receiver>
-        <receiver android:name="RepeatingAlarmReceiver" android:process=":remote" />
-    </application>
+	<application android:icon="@drawable/icon" android:label="@string/app_name">
+		<service android:name=".BackupService"></service>
+		<receiver android:name=".BootCompleteReceiver">
+			<intent-filter>
+				<action android:name="android.intent.action.BOOT_COMPLETED"></action>
+			</intent-filter>
+		</receiver>
+		<receiver android:name="RepeatingAlarmReceiver"
+			android:process=":remote" />
+	</application>
 </manifest>
