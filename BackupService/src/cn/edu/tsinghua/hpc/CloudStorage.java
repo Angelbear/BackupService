@@ -90,7 +90,6 @@ public class CloudStorage {
 			HttpResponse r = client.execute(g);
 			return r.getEntity().getContent();
 		} catch (IOException e) {
-			Log.d(TAG,e.getLocalizedMessage());
 		}
 
 		return null;

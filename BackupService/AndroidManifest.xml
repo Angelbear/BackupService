@@ -30,5 +30,8 @@
 		</receiver>
 		<receiver android:name="RepeatingAlarmReceiver"
 			android:process=":remote" />
+		<activity android:name=".DialogActivity" android:label="@string/restoring"
+			android:theme="@android:style/Theme.Dialog">
+		</activity>
 	</application>
 </manifest>
